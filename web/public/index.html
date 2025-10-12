@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduShare MVP</title>
+  <!-- Use Tailwind via CDN to simplify styling without a build step. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div id="app" class="w-full"></div>
+  <script>
+    /**
+     * Frontend implementation without external build tools or libraries.
+     * This script dynamically switches between views based on the user's
+     * authentication state and role. It communicates with the backend
+     * implemented in src/index.ts using the Fetch API.
+     */
+    const API_BASE = 'http://localhost:4000';
+    const app = document.getElementById('app');
+
+    // Retrieve persisted auth state from localStorage
+    let token = localStorage.getItem('token');
+    let user = localStorage.getItem('user');
+    user = user ? JSON.parse(user) : null;
+
+    function show(component) {
+      app.innerHTML = '';
+      app.appendChild(component);
+    }
+
+    function renderLogin() {
+      const container = document.createElement('div');
+      container.className = 'max-w-md mx-auto bg-white p-6 rounded shadow';
+      container.innerHTML = `
+        <h1 class="text-2xl font-bold mb-4 text-center">EduShare Login / Register</h1>
+        <div id="error" class="text-red-600 mb-2"></div>
+        <label class="block mb-2 text-sm font-medium">Email</label>
+        <input id="email" class="w-full p-2 mb-4 border rounded" type="email" />
+        <label class="block mb-2 text-sm font-medium">Password</label>
+        <input id="password" class="w-full p-2 mb-4 border rounded" type="password" />
+        <label class="block mb-2 text-sm font-medium">Role</label>
+        <select id="role" class="w-full p-2 mb-4 border rounded">
+          <option value="teacher">Teacher</option>
+          <option value="student">Student</option>
+        </select>
+        <div class="flex justify-between">
+          <button id="loginBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Login</button>
+          <button id="registerBtn" class="bg-green-600 text-white px-4 py-2 rounded">Register</button>
+        </div>
+      `;
+      container.querySelector('#loginBtn').onclick = async () => {
+        const email = container.querySelector('#email').value;
+        const password = container.querySelector('#password').value;
+        login(email, password);
+      };
+      container.querySelector('#registerBtn').onclick = async () => {
+        const email = container.querySelector('#email').value;
+        const password = container.querySelector('#password').value;
+        const role = container.querySelector('#role').value;
+        register(email, password, role);
+      };
+      show(container);
+    }
+
+    async function login(email, password) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed');
+        token = data.token;
+        user = data.user;
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        renderDashboard();
+      } catch (err) {
+        document.getElementById('error').textContent = err.message;
+      }
+    }
+
+    async function register(email, password, role) {
+      try {
+        const name = email.split('@')[0];
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, role })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Registration failed');
+        // auto-login after registration
+        await login(email, password);
+      } catch (err) {
+        document.getElementById('error').textContent = err.message;
+      }
+    }
+
+    function logout() {
+      token = null;
+      user = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      renderLogin();
+    }
+
+    async function fetchActivities() {
+      const res = await fetch(`${API_BASE}/activities`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      return res.json();
+    }
+
+    async function fetchResources() {
+      const res = await fetch(`${API_BASE}/resources`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      return res.json();
+    }
+
+    async function createActivity(payload) {
+      const res = await fetch(`${API_BASE}/activities`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload)
+      });
+      return res.json();
+    }
+
+    async function createResource(payload) {
+      const res = await fetch(`${API_BASE}/resources`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload)
+      });
+      return res.json();
+    }
+
+    function renderDashboard() {
+      if (!token || !user) {
+        return renderLogin();
+      }
+      if (user.role === 'teacher') {
+        return renderTeacherDashboard();
+      }
+      return renderStudentDashboard();
+    }
+
+    async function renderTeacherDashboard() {
+      const activities = await fetchActivities();
+      const resources = await fetchResources();
+      const container = document.createElement('div');
+      container.className = 'p-4';
+      container.innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+          <h1 class="text-2xl font-bold">Welcome, ${user.name}</h1>
+          <button id="logoutBtn" class="text-red-600 underline">Logout</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white p-4 rounded shadow" id="activitiesSection">
+            <h2 class="text-xl font-semibold mb-2">Your Activities</h2>
+            <ul id="activitiesList"></ul>
+            <h3 class="font-semibold mt-4">Create Activity</h3>
+            <div id="activityForm" class="mt-2"></div>
+          </div>
+          <div class="bg-white p-4 rounded shadow" id="resourcesSection">
+            <h2 class="text-xl font-semibold mb-2">Your Resources</h2>
+            <ul id="resourcesList"></ul>
+            <h3 class="font-semibold mt-4">Create Resource</h3>
+            <div id="resourceForm" class="mt-2"></div>
+          </div>
+        </div>
+      `;
+      container.querySelector('#logoutBtn').onclick = logout;
+      // Populate lists
+      const actList = container.querySelector('#activitiesList');
+      activities.forEach(a => {
+        const li = document.createElement('li');
+        li.className = 'mb-2';
+        li.innerHTML = `<strong>${a.title}</strong> - ${a.description}`;
+        actList.appendChild(li);
+      });
+      const resList = container.querySelector('#resourcesList');
+      resources.forEach(r => {
+        const li = document.createElement('li');
+        li.className = 'mb-2';
+        li.innerHTML = `<strong>${r.title}</strong><br><span class="text-sm">${r.content}</span>`;
+        resList.appendChild(li);
+      });
+      // Create forms
+      renderActivityForm(container.querySelector('#activityForm'));
+      renderResourceForm(container.querySelector('#resourceForm'));
+      show(container);
+    }
+
+    function renderActivityForm(target) {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <input id="actTitle" class="w-full p-2 mb-2 border rounded" placeholder="Title" />
+        <textarea id="actDesc" class="w-full p-2 mb-2 border rounded" placeholder="Description"></textarea>
+        <input id="actQuestion" class="w-full p-2 mb-2 border rounded" placeholder="Question" />
+        <input id="actOpt0" class="w-full p-2 mb-2 border rounded" placeholder="Option 1" />
+        <input id="actOpt1" class="w-full p-2 mb-2 border rounded" placeholder="Option 2" />
+        <input id="actOpt2" class="w-full p-2 mb-2 border rounded" placeholder="Option 3" />
+        <label class="block text-sm mb-1">Correct Option (0-2)</label>
+        <input id="actCorrect" class="w-full p-2 mb-2 border rounded" type="number" min="0" max="2" value="0" />
+        <button id="actSubmit" class="bg-blue-500 text-white px-3 py-1 rounded">Create</button>
+        <div id="actError" class="text-red-600 text-sm mt-1"></div>
+      `;
+      div.querySelector('#actSubmit').onclick = async () => {
+        const title = div.querySelector('#actTitle').value;
+        const description = div.querySelector('#actDesc').value;
+        const question = div.querySelector('#actQuestion').value;
+        const options = [0,1,2].map(i => div.querySelector(`#actOpt${i}`).value);
+        const correctOption = Number(div.querySelector('#actCorrect').value);
+        try {
+          const result = await createActivity({ title, description, questions: [{ question, options, correctOption }] });
+          if (result.error) throw new Error(result.error);
+          renderTeacherDashboard();
+        } catch (err) {
+          div.querySelector('#actError').textContent = err.message;
+        }
+      };
+      target.appendChild(div);
+    }
+
+    function renderResourceForm(target) {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <input id="resTitle" class="w-full p-2 mb-2 border rounded" placeholder="Title" />
+        <textarea id="resContent" class="w-full p-2 mb-2 border rounded" placeholder="Content"></textarea>
+        <button id="resSubmit" class="bg-green-500 text-white px-3 py-1 rounded">Create</button>
+        <div id="resError" class="text-red-600 text-sm mt-1"></div>
+      `;
+      div.querySelector('#resSubmit').onclick = async () => {
+        const title = div.querySelector('#resTitle').value;
+        const content = div.querySelector('#resContent').value;
+        try {
+          const result = await createResource({ title, content });
+          if (result.error) throw new Error(result.error);
+          renderTeacherDashboard();
+        } catch (err) {
+          div.querySelector('#resError').textContent = err.message;
+        }
+      };
+      target.appendChild(div);
+    }
+
+    async function renderStudentDashboard() {
+      const activities = await fetchActivities();
+      const resources = await fetchResources();
+      const container = document.createElement('div');
+      container.className = 'p-4';
+      container.innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+          <h1 class="text-2xl font-bold">Welcome, ${user.name}</h1>
+          <button id="logoutBtn" class="text-red-600 underline">Logout</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-xl font-semibold mb-2">Available Activities</h2>
+            <ul id="actList"></ul>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-xl font-semibold mb-2">Resources</h2>
+            <ul id="resList"></ul>
+          </div>
+        </div>
+        <div id="modalContainer"></div>
+      `;
+      container.querySelector('#logoutBtn').onclick = logout;
+      const actList = container.querySelector('#actList');
+      activities.forEach(a => {
+        const li = document.createElement('li');
+        li.className = 'mb-2';
+        li.innerHTML = `<strong>${a.title}</strong> - ${a.description} <button class="ml-2 text-blue-600 underline">Start</button>`;
+        li.querySelector('button').onclick = () => showQuizModal(a);
+        actList.appendChild(li);
+      });
+      const resList = container.querySelector('#resList');
+      resources.forEach(r => {
+        const li = document.createElement('li');
+        li.className = 'mb-2';
+        li.innerHTML = `<strong>${r.title}</strong><br><span class="text-sm">${r.content}</span>`;
+        resList.appendChild(li);
+      });
+      show(container);
+    }
+
+    function showQuizModal(activity) {
+      // Build modal
+      const overlay = document.createElement('div');
+      overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      const modal = document.createElement('div');
+      modal.className = 'bg-white p-4 rounded shadow w-full max-w-md max-h-screen overflow-auto';
+      const answers = new Array(activity.questions.length).fill(null);
+      let submitted = false;
+      function renderModal() {
+        modal.innerHTML = `<h3 class="text-xl font-bold mb-2">${activity.title}</h3>`;
+        activity.questions.forEach((q, idx) => {
+          const qDiv = document.createElement('div');
+          qDiv.className = 'mb-4';
+          qDiv.innerHTML = `<p class="font-semibold">${q.question}</p>`;
+          q.options.forEach((opt, i) => {
+            const label = document.createElement('label');
+            label.className = 'block text-sm';
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = `q${idx}`;
+            input.checked = answers[idx] === i;
+            input.onchange = () => { answers[idx] = i; };
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(' ' + opt));
+            qDiv.appendChild(label);
+          });
+          modal.appendChild(qDiv);
+        });
+        if (!submitted) {
+          const btn = document.createElement('button');
+          btn.className = 'bg-blue-500 text-white px-3 py-1 rounded';
+          btn.textContent = 'Submit';
+          btn.onclick = () => { submitted = true; renderModal(); };
+          modal.appendChild(btn);
+        } else {
+          const correctCount = answers.filter((ans, idx) => ans !== null && ans === activity.questions[idx].correctOption).length;
+          const p = document.createElement('p');
+          p.className = 'mb-2';
+          p.textContent = `You answered ${correctCount} of ${activity.questions.length} correctly.`;
+          modal.appendChild(p);
+        }
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'mt-2 text-blue-600 underline';
+        closeBtn.textContent = 'Close';
+        closeBtn.onclick = () => document.body.removeChild(overlay);
+        modal.appendChild(closeBtn);
+      }
+      renderModal();
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+    }
+
+    // On first load decide which view to render
+    if (!token || !user) {
+      renderLogin();
+    } else {
+      renderDashboard();
+    }
+  </script>
+</body>
+</html>

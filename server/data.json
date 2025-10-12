@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "id": "70a53d0c9839ac9084814a59e16b1879",
+      "name": "Teacher One",
+      "email": "teacher@example.com",
+      "passwordHash": "ce05f044ee7a3947fcf73c1ea165f336c1f317fd39b06692fd9213c884f7ae2b",
+      "role": "teacher"
+    }
+  ],
+  "activities": [
+    {
+      "id": "77ce7a2b9025ebddd97520139be1e867",
+      "title": "Sample Quiz",
+      "description": "Test quiz.",
+      "questions": [
+        {
+          "question": "2+2?",
+          "options": [
+            "3",
+            "4",
+            "5"
+          ],
+          "correctOption": 1
+        }
+      ],
+      "createdBy": "70a53d0c9839ac9084814a59e16b1879",
+      "createdAt": "2025-10-12T19:02:38.332Z"
+    }
+  ],
+  "resources": []
+}
