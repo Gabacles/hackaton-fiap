@@ -4,7 +4,7 @@ EduShare is a minimum‑viable product built for the **Hackathon 4FSDT** challen
 
 ## 🎯 Problem & Vision
 
-Teachers in public schools often spend valuable personal time creating lesson materials and searching for supplementary resources.  Research shows that over three‑quarters of teachers build their own materials and 78 % turn to the internet for supplementary materials【353419263248785†L68-L90】.  At the same time, technology is increasingly seen as essential to classroom instruction, yet teachers need tools with ready‑made content and time‑saving workflows【308748868467740†L173-L223】.  Common pain points include time management, communication gaps with students and families and limited access to engaging digital resources【877928689073630†L66-L76】.
+Teachers in public schools often spend valuable personal time creating lesson materials and searching for supplementary resources.  Research shows that over three‑quarters of teachers build their own materials and 78 % turn to the internet for supplementary materials.  At the same time, technology is increasingly seen as essential to classroom instruction, yet teachers need tools with ready‑made content and time‑saving workflows.  Common pain points include time management, communication gaps with students and families and limited access to engaging digital resources.
 
 EduShare addresses these issues by giving teachers a single space to create quizzes (activities), share digital resources and instantly publish them to students.  Students log in to access the latest activities, take quizzes and explore shared links.  The platform is designed to be intuitive and accessible so that teachers can spend less time on logistics and more time on teaching.
 
@@ -36,7 +36,7 @@ hackathon4fsdt/
 * **Axios** configured in `src/services/api.ts` with automatic token injection and Next.js rewrites to proxy `/api` requests to the backend.
 * **Teacher dashboard** (`/dashboard`) where teachers can create activities, share resources and add questions; lists existing activities and resources.
 * **Student view** (`/student`) that lists activities and resources.  Students can start a quiz, answer questions sequentially and see progress.
-* **Login/Register page** (`/login`) with role selection (teacher/student) built with accessible forms and responsive design.  A screenshot of the plain‑HTML version used during development is shown below【816069265251412†screenshot】.
+* **Login/Register page** (`/login`) with role selection (teacher/student) built with accessible forms and responsive design.  A screenshot of the plain‑HTML version used during development is shown below.
 
 ## 🚀 Quick Start
 
