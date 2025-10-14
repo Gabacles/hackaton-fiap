@@ -108,8 +108,6 @@ A aplicação web será servida em `http://localhost:3000`. Acesse `/login` para
 
 > **Observação:** o fluxo de autenticação utiliza JWT armazenado em `localStorage`. Para encerrar a sessão, basta clicar em **Sair** no cabeçalho.
 
-## 📝 Figma
-
 ## 📝 Protótipo
 
 Os arquivos do protótipo de alta fidelidade, contendo as telas de login, dashboard do docente e visão do aluno, estão disponíveis na pasta [`prototype`](./prototype) na raiz do projeto.
