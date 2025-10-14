@@ -1,5 +1,21 @@
 # TeacherAid – MVP para Docentes e Alunos da Rede Pública
 
+## 🎬 Referências de Vídeo
+
+Na raiz do projeto estão disponíveis dois vídeos demonstrativos:
+
+- **Vídeo do Pitch:** [`VIDEO_PITCH.mp4`](./VIDEO_PITCH.mp4)
+- **Vídeo do MVP:** [`VIDEO_MVP.mp4`](./VIDEO_MVP.mp4)
+
+> **Atenção:** Para assistir aos vídeos, é necessário baixá-los localmente, pois não são reproduzidos diretamente pelo navegador ou pelo GitHub.
+
+
+## 📄 Relatório do Projeto
+
+O relatório detalhado do MVP, incluindo contexto, decisões de arquitetura e próximos passos, está disponível em:
+
+- [`report.md`](./report.md)
+
 Este repositório contém o código‑fonte de um MVP que auxilia docentes de escolas públicas brasileiras na criação e compartilhamento de atividades, acompanhamento de estudantes e gestão de conteúdos. O projeto é dividido em duas aplicações: uma **API** (backend) escrita com Node.js/Express/Prisma e um **frontend** web construído com React, Next.js e Tailwind CSS. Todas as interfaces visíveis pelo usuário estão em **Português (pt‑BR)**, enquanto o código está em inglês.
 
 ## 📦 Estrutura do repositório
@@ -94,11 +110,11 @@ A aplicação web será servida em `http://localhost:3000`. Acesse `/login` para
 
 ## 📝 Figma
 
-O protótipo de alta fidelidade contendo as telas de login, dashboard do docente e visão do aluno está disponível no Figma:
+## 📝 Protótipo
 
-[➡️ Acessar protótipo no Figma](https://www.figma.com/file/TeacherAid/Prototype)
+Os arquivos do protótipo de alta fidelidade, contendo as telas de login, dashboard do docente e visão do aluno, estão disponíveis na pasta [`prototype`](./prototype) na raiz do projeto.
 
-O link acima é público para leitura e demonstra o fluxo completo da aplicação.
+> Para visualizar os protótipos, baixe os arquivos localmente e utilize um visualizador compatível (por exemplo, Figma Desktop ou outro software indicado no nome/descrição dos arquivos).
 
 ## 👨‍💻 Scripts úteis
 
