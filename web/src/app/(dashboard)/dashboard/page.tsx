@@ -112,7 +112,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <header className="mb-6 flex items-center justify-between">
+      <header className="mb-6 flex items-center justify-between border-b-2 pb-3">
         <h1 className="text-2xl font-bold">Olá, {user?.name}</h1>
         <button
           onClick={() => {
